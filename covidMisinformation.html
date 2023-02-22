@@ -50,8 +50,7 @@
       <div class="container">
         <div class="row mb-4 align-items-center">
           <div class="col-md-6" data-aos="fade-up">
-            <h2>State of Charge Estimation for FPV Drones</h2>
-            <p>Improved state of charge calculation for drone batteries using voltage and accounting for battery sag in open source Betaflight software impacting over 100,000 pilots. </p>
+            <h2>Covid Misinformation Detector</h2>
           </div>
         </div>
       </div>
@@ -83,12 +82,23 @@
 
               -->
               <div class="display-image-div">
-                <img src="assets/img/drone.png" alt="Image" class="img-fluid display-image">
-                <p class="caption">FPV drone with the SOC feature on it</p>
+                <img src="assets/img/covidMisinf.png" alt="Image" class="img-fluid display-image">
+                <p class="caption">Tool for detecting false covid-related news using sentiment analysis</p>
               </div>
               <div class="display-image-div">
-                <img src="assets/img/socgraph.png" alt="Image" class="img-fluid display-image">
-                <p class="caption">Raw voltage (left) and adjusted voltage that is fed into final SoC calculations (right)</p>
+                <img src="assets/img/covismisinf2.png" alt="Image" class="img-fluid display-image">
+                <p class="caption">This is the correlation matrix of the TFIDF features, with an additional column representing the
+                    correlation of each feature to the label. The feature for the word “covid” was highly correlated
+                    with the one for “19” (p = 0.99), and we eliminated tfidf_19.</p>
+              </div>
+              <div class="display-image-div">
+                <img src="assets/img/decisiontrees.png" alt="Image" class="img-fluid display-image">
+                <p class="caption">Upon visualizing the decision tree with depth 8, we found out that proper nouns, adjective
+                    and misspellings are more frequent in misleading articles.</p>
+              </div>
+              <div class="display-image-div">
+                <img src="assets/img/fmeasures.png" alt="Image" class="img-fluid display-image">
+                <p class="caption">Comparing the F-measures of various models used for this problem before choosing which one to move forward with.</p>
               </div>
               <!-- 
         
@@ -98,17 +108,18 @@
             </div>
             <div class="col-md-6 ml-auto" data-aos="fade-up" data-aos-delay="100">
               <div class="sticky-content">
-                <h3 class="h3">Prototype ESC board</h3>
+                <h3 class="h3">Covid misinformation detector</h3>
                 <p class="mb-4"><span class="text-muted">Personal</span></p>
                 <div class="mb-5">
-                  <p>Added State of Charge Estimation to Betaflight FPV flight controller software, which is a much requested feature on the #1 most used flight controller software by FPV drone pilots. A low-pass filter is used to smooth the high frequency noise in voltage readings because of age/ overcharging of LiPo batteries. The voltage is then adjusted with relation to the throttle to avoid the effects of battery sag, before finally calculating the battery percentagee remaining.</p>
+                  <p>Programmed a tool for detecting false covid-related news on social media using sentiment analysis based on certain semantic and linguistic patterns found in false information pieces. Various supervised and non-supervised learning methods were used and their performace including their F-measures, accuracies, precision, and recall were compared against each other to ultimately get the best model for this problem.</p>
                 </div>
                 <h4 class="h4 mb-3">Skills</h4>
                 <ul class="list-unstyled list-line mb-5">
-                  <li>Low pass filters</li>
-                  <li>Embedded C</li>
-                  <li>Unit testing</li>
-                  <li>Battery technology</li>
+                  <li>Deep learning</li>
+                  <li>Machine learning</li>
+                  <li>Python programming</li>
+                  <li>Natural Language Processing</li>
+                  <li>Sentiment Analysis</li>
                 </ul>
 
                 <!-- <p><a href="#" class="readmore">Visit Website</a></p> -->
