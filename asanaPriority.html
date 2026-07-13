@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Asana: Explainable Smart Priority (Prototype)</title>
+<style>
+  :root {
+    --coral: #F06A6A;
+    --coral-dark: #DD5353;
+    --ink: #17181A;
+    --grey-900: #2E2F33;
+    --grey-600: #6C6F76;
+    --grey-300: #D8D9DE;
+    --grey-100: #F4F4F6;
+    --white: #FFFFFF;
+    --amber: #E8A33D;
+    --green: #4CAF7D;
+    --blue: #4C87E8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: var(--grey-100);
+    color: var(--ink);
+    padding: 28px;
+  }
+  .frame { max-width: 980px; margin: 0 auto; }
+
+  .banner {
+    background: var(--ink); color: var(--white); border-radius: 10px;
+    padding: 16px 22px; margin-bottom: 22px; font-size: 13.5px; line-height: 1.5;
+  }
+  .banner b { color: #FFD9A0; }
+
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 18px;
+  }
+  .topbar h1 { font-size: 22px; font-weight: 700; }
+  .topbar .sub { font-size: 13px; color: var(--grey-600); margin-top: 2px; }
+
+  .toggle-row { display: flex; gap: 8px; }
+  .toggle {
+    padding: 7px 14px; border-radius: 20px; font-size: 13px; font-weight: 600;
+    border: 1.5px solid var(--grey-300); background: var(--white); cursor: pointer; color: var(--grey-600);
+  }
+  .toggle.active { background: var(--coral); border-color: var(--coral); color: var(--white); }
+
+  .board { display: flex; flex-direction: column; gap: 10px; }
+
+  .task-card {
+    background: var(--white); border: 1px solid var(--grey-300); border-radius: 10px;
+    padding: 14px 16px; display: flex; flex-direction: column; gap: 8px;
+    transition: box-shadow 0.15s;
+  }
+  .task-card:hover { box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+
+  .task-top { display: flex; align-items: center; gap: 12px; }
+  .rank-badge {
+    width: 26px; height: 26px; border-radius: 50%; background: var(--coral); color: var(--white);
+    font-size: 12.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .task-title { font-size: 14.5px; font-weight: 600; flex: 1; }
+  .task-meta { font-size: 12px; color: var(--grey-600); display: flex; gap: 10px; align-items: center; }
+  .pill {
+    font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 10px;
+  }
+  .pill.due { background: #FCE4E4; color: var(--coral-dark); }
+  .pill.blocked { background: #FDEFD9; color: #A46A0F; }
+  .pill.dep { background: #E4ECFC; color: #2F5FC4; }
+
+  .reason-toggle {
+    font-size: 12px; font-weight: 600; color: var(--blue); cursor: pointer;
+    display: flex; align-items: center; gap: 4px; align-self: flex-start;
+  }
+  .reason-toggle::before { content: "\25B8"; font-size: 10px; transition: transform 0.15s; }
+  .reason-toggle.open::before { transform: rotate(90deg); }
+
+  .reason-panel {
+    display: none; background: var(--grey-100); border-radius: 8px; padding: 12px 14px;
+    font-size: 12.5px; line-height: 1.6; color: var(--grey-900);
+  }
+  .reason-panel.show { display: block; }
+  .reason-panel .factor { display: flex; gap: 8px; margin-bottom: 6px; }
+  .reason-panel .factor:last-child { margin-bottom: 0; }
+  .factor .dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+  .factor .dot.high { background: var(--coral); }
+  .factor .dot.med { background: var(--amber); }
+  .factor .dot.low { background: var(--green); }
+  .factor .weight { font-weight: 700; margin-left: auto; color: var(--grey-600); flex-shrink: 0; }
+
+  .why-not { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--grey-300); color: var(--grey-600); font-style: italic; }
+
+  .old-way {
+    background: var(--white); border: 1px solid var(--grey-300); border-radius: 10px; padding: 16px;
+    margin-top: 22px; font-size: 12.5px; color: var(--grey-600); line-height: 1.6;
+  }
+  .old-way b { color: var(--ink); }
+  .old-way .fake-badge {
+    display: inline-flex; align-items: center; gap: 5px; background: #F0EAFB; color: #7B4FD6;
+    font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 10px; margin-left: 6px;
+  }
+</style>
+</head>
+<body>
+<div class="frame">
+
+  <div class="banner">
+    <b>Prototype note:</b> This mocks a redesign of Asana's "Smart" task sort. Real Asana ranks tasks with a purple sparkle badge and zero explanation. This version shows the actual reasoning: deadline pressure, who's blocked on you, and dependency chains, the inputs a real "smart" ranking needs to be trustworthy rather than decorative.
+  </div>
+
+  <div class="topbar">
+    <div>
+      <h1>Design Sprint &middot; My Tasks</h1>
+      <div class="sub">12 tasks &middot; sorted by priority</div>
+    </div>
+    <div class="toggle-row">
+      <div class="toggle">Due Date</div>
+      <div class="toggle active">Smart Priority</div>
+      <div class="toggle">Custom</div>
+    </div>
+  </div>
+
+  <div class="board" id="board"></div>
+
+  <div class="old-way">
+    <b>What this replaces:</b> Asana's current "Smart" sort <span class="fake-badge">&#10022; AI Sorted</span> reorders your list with no visible reasoning. Two tasks with the same due date can swap positions between refreshes with no explanation, so people stop trusting it and go back to sorting by due date manually, which is the actual gap this prototype fixes.
+  </div>
+
+</div>
+
+<script>
+const tasks = [
+  {
+    rank: 1, title: "Fix checkout bug blocking QA sign-off",
+    due: "Due today", blocked: "3 teammates blocked", dep: null,
+    reasons: [
+      { level: "high", text: "Due today, and today is the last day before the sprint review", weight: "Weight: high" },
+      { level: "high", text: "3 teammates on your team are explicitly blocked waiting on this task", weight: "Weight: high" },
+      { level: "med", text: "No downstream dependencies beyond QA sign-off", weight: "Weight: low" },
+    ],
+    whyNot: null,
+  },
+  {
+    rank: 2, title: "Review API contract for payments service",
+    due: "Due in 2 days", blocked: null, dep: "Blocks 4 other tasks",
+    reasons: [
+      { level: "med", text: "Due in 2 days, some slack remains", weight: "Weight: medium" },
+      { level: "high", text: "4 other tasks across 2 projects can't start until this is approved", weight: "Weight: high" },
+      { level: "low", text: "No one is actively blocked right now, they're blocked once they reach this stage", weight: "Weight: low" },
+    ],
+    whyNot: "Ranked above tasks with earlier due dates because of how many tasks are queued behind it, not just its own deadline.",
+  },
+  {
+    rank: 3, title: "Update onboarding doc for new hires",
+    due: "Due in 5 days", blocked: null, dep: null,
+    reasons: [
+      { level: "low", text: "Due in 5 days, comfortable runway", weight: "Weight: low" },
+      { level: "low", text: "No one is blocked on this task", weight: "Weight: low" },
+      { level: "low", text: "Nothing downstream depends on it", weight: "Weight: low" },
+    ],
+    whyNot: "Ranked lower than 'Draft Q3 roadmap' despite an earlier due date, because nothing depends on it and no one is waiting.",
+  },
+  {
+    rank: 4, title: "Draft Q3 roadmap outline",
+    due: "Due in 6 days", blocked: null, dep: "Blocks planning meeting prep",
+    reasons: [
+      { level: "low", text: "Due in 6 days", weight: "Weight: low" },
+      { level: "med", text: "Planning meeting prep can't start until this exists", weight: "Weight: medium" },
+      { level: "low", text: "No one is currently blocked", weight: "Weight: low" },
+    ],
+    whyNot: null,
+  },
+];
+
+const board = document.getElementById('board');
+
+function levelDot(level) {
+  return `<span class="dot ${level}"></span>`;
+}
+
+function renderTask(t, idx) {
+  const pills = [];
+  if (t.due) pills.push(`<span class="pill due">${t.due}</span>`);
+  if (t.blocked) pills.push(`<span class="pill blocked">${t.blocked}</span>`);
+  if (t.dep) pills.push(`<span class="pill dep">${t.dep}</span>`);
+
+  const reasonsHtml = t.reasons.map(r => `
+    <div class="factor">
+      ${levelDot(r.level)}
+      <span>${r.text}</span>
+      <span class="weight">${r.weight}</span>
+    </div>
+  `).join('');
+
+  const whyNotHtml = t.whyNot ? `<div class="why-not">${t.whyNot}</div>` : '';
+
+  return `
+    <div class="task-card">
+      <div class="task-top">
+        <div class="rank-badge">${t.rank}</div>
+        <div class="task-title">${t.title}</div>
+      </div>
+      <div class="task-meta">${pills.join('')}</div>
+      <div class="reason-toggle" onclick="toggleReason(${idx})" id="toggle-${idx}">Why is this ranked #${t.rank}?</div>
+      <div class="reason-panel" id="reason-${idx}">
+        ${reasonsHtml}
+        ${whyNotHtml}
+      </div>
+    </div>
+  `;
+}
+
+board.innerHTML = tasks.map(renderTask).join('');
+
+function toggleReason(idx) {
+  document.getElementById('reason-' + idx).classList.toggle('show');
+  document.getElementById('toggle-' + idx).classList.toggle('open');
+}
+</script>
+</body>
+</html>
